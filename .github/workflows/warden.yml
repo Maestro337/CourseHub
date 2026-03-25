@@ -1,0 +1,47 @@
+name: Warden Security Scan
+
+on:
+  push:
+    branches: [ main, master, develop ]
+  pull_request:
+    branches: [ main, master, develop ]
+
+permissions:
+  contents: read
+  security-events: write
+
+jobs:
+  warden:
+    name: Static Security Analysis
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Cache cargo
+        uses: Swatinem/rust-cache@v2
+
+      - name: Clone Warden
+        run: git clone https://github.com/Maestro337/WardenAnaliz warden-src
+
+      - name: Build Warden
+        run: cargo build --release --manifest-path warden-src/Cargo.toml
+
+      - name: Run Warden
+        run: |
+          ./warden-src/target/release/warden . \
+            --format sarif \
+            --out results.sarif \
+            --min-severity low
+        continue-on-error: true
+
+      - name: Upload SARIF to GitHub Security
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: results.sarif
+          category: warden
