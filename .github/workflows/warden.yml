@@ -26,7 +26,7 @@ jobs:
         uses: Swatinem/rust-cache@v2
 
       - name: Clone Warden
-        run: git clone https://${{ secrets.WARDEN_TOKEN }}@github.com/Maestro337/WardenAnaliz warden-src
+        run: git clone https://${{ secrets.WARDEN_TOKEN }}@github.com/Maestro337/Warden warden-src
 
       - name: Build Warden
         run: cargo build --release --manifest-path warden-src/Cargo.toml
